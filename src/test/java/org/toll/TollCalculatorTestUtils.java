@@ -1,6 +1,8 @@
 package org.toll;
 
 import org.toll.services.HourFeeService;
+import org.toll.utils.DateUtils;
+import org.toll.utils.TimeRange;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,5 +36,9 @@ public class TollCalculatorTestUtils {
         var feeRange = HourFeeService.timeRangeFeeFnMap.keySet().stream().findFirst().get();
         var feeDate = LocalDate.parse("1-1-2024");
         return feeDate.atTime(feeRange.getStartTime());
+    }
+
+    public static Date getTripDateFromString(String s) {
+        return DateUtils.convertLocalDateTimeToDate(LocalDateTime.parse(s, DateTimeFormatter.ofPattern("d-M-yyyy HH:mm")));
     }
 }

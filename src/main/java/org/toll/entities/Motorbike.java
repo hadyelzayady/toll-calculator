@@ -5,4 +5,9 @@ public class Motorbike implements Vehicle {
   public String getType() {
     return "Motorbike";
   }
+
+  @Override
+  public boolean isFeeFree() {
+    return false;
+  }
 }

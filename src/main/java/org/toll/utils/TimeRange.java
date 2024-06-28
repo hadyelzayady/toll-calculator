@@ -19,7 +19,7 @@ public class TimeRange {
     }
 
     public boolean contains(LocalTime time) {
-        return time.isAfter(time.minusMinutes(1)) && time.isBefore(endTime.plusMinutes(1));
+        return time.isAfter(startTime.minusMinutes(1)) && time.isBefore(endTime.plusMinutes(1));
     }
 
     @Override
