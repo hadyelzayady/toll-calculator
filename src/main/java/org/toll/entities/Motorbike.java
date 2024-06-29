@@ -8,6 +8,6 @@ public class Motorbike implements Vehicle {
 
   @Override
   public boolean isFeeFree() {
-    return false;
+    return true;
   }
 }

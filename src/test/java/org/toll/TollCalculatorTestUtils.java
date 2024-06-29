@@ -1,8 +1,7 @@
 package org.toll;
 
-import org.toll.services.HourFeeService;
+import org.toll.services.TimeFeeService;
 import org.toll.utils.DateUtils;
-import org.toll.utils.TimeRange;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,7 +9,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TollCalculatorTestUtils {
@@ -33,7 +31,7 @@ public class TollCalculatorTestUtils {
     }
 
     public static LocalDateTime getDateWithFeeHour() {
-        var feeRange = HourFeeService.timeRangeFeeFnMap.keySet().stream().findFirst().get();
+        var feeRange = TimeFeeService.timeRangeFeeFnMap.keySet().stream().findFirst().get();
         var feeDate = LocalDate.parse("1-1-2024");
         return feeDate.atTime(feeRange.getStartTime());
     }
