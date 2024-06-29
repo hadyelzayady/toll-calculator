@@ -45,8 +45,9 @@ public class TollCalculator {
                 )
                 .mapToInt(Integer::intValue).sum();
 
-        log.info("total fees is {}", totalFees);
-        return Math.min(totalFees, MAX_TOTAL_FEES_PER_DAY);
+        var appliedFee = Math.min(totalFees, MAX_TOTAL_FEES_PER_DAY);
+        log.info("total fees is {}, max fee is {}, applied fee: {}", totalFees, MAX_TOTAL_FEES_PER_DAY, appliedFee);
+        return appliedFee;
     }
 
     private int getWindowListFee(List<Date> windowList, Vehicle vehicle) {
