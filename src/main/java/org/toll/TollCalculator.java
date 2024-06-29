@@ -8,6 +8,7 @@ import org.toll.services.ValidationService;
 import org.toll.utils.DateUtils;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,12 +26,17 @@ public class TollCalculator {
      * @param vehicle - the vehicle
      * @param dates   - date and time of all passes on one day
      * @return - the total toll fee for that day
+     *
+     * As this code runs in multiple regions, dates are without timezone assuming utc by default
      */
     public int getDayTollFee(Vehicle vehicle, Date... dates) throws IllegalArgumentException {
-        List<Date> datesList = Arrays.asList(dates);
+        if (vehicle.isFeeFree()) {
+            return 0;
+        }
+        List<LocalDateTime> datesList = Arrays.stream(dates).map(DateUtils::convertDateToLocalDateTime).toList();
         var isValid = ValidationService.validateDates(datesList);
         if (!isValid.getLeft()) {
-            log.info("Dates are not valid with validation message: {}", isValid.getRight());
+            log.error("Dates are not valid with validation message: {}", isValid.getRight());
             throw new IllegalArgumentException(String.format("Dates are not valid with validation message: %s", isValid.getRight()));
         }
         log.info("get day toll fee of vehicle with type: {} with dates: {} ", vehicle.getType(), datesList);
@@ -50,17 +56,17 @@ public class TollCalculator {
         return appliedFee;
     }
 
-    private int getWindowListFee(List<Date> windowList, Vehicle vehicle) {
+    private int getWindowListFee(List<LocalDateTime> windowList, Vehicle vehicle) {
         return windowList.stream().map(feeDate -> getDateTollFee(feeDate, vehicle))
                 .max(Comparator.naturalOrder())
                 .orElse(0);
     }
 
-    private int getDateTollFee(final Date date, Vehicle vehicle) {
+    private int getDateTollFee(final LocalDateTime date, Vehicle vehicle) {
         if (TimeFeeService.isDateFreeFee(date) || vehicle.isFeeFree()) {
             return 0;
         }
-        return TimeFeeService.getTimeFee(DateUtils.convertDateToLocalDateTime(date));
+        return TimeFeeService.getTimeFee(date);
     }
 
     /**
@@ -69,7 +75,7 @@ public class TollCalculator {
      * @param dates - list of dates
      * @return - start and end index of the fee window (1h by default)
      */
-    private List<Pair<Integer, Integer>> getFeeHourWindows(List<Date> dates) {
+    private List<Pair<Integer, Integer>> getFeeHourWindows(List<LocalDateTime> dates) {
         if (dates.isEmpty()) {
             return new ArrayList<>();
         }
@@ -78,8 +84,8 @@ public class TollCalculator {
         int windowStartIndex = 0;
         int windowEndIndex;
         for (windowEndIndex = 1; windowEndIndex < sortedDates.size(); windowEndIndex++) {
-            var localDate = DateUtils.convertDateToLocalDateTime(sortedDates.get(windowEndIndex));
-            Duration duration = Duration.between(DateUtils.convertDateToLocalDateTime(sortedDates.get(windowStartIndex)), localDate);
+            var localDate = sortedDates.get(windowEndIndex);
+            Duration duration = Duration.between(sortedDates.get(windowStartIndex), localDate);
             if (duration.toMinutes() > FEE_WINDOW_DURATION_IN_MINUTES) {
                 feeWindows.add(Pair.of(windowStartIndex, windowEndIndex - 1));
                 windowStartIndex = windowEndIndex;

@@ -18,9 +18,9 @@ public class TollCalculatorUnitTests {
     private final Pair<Date, Integer> dateTimeAt8 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2024 08:00"), 13);
     private final Pair<Date, Integer> dateTimeAt8_30 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2024 08:30"), 8);
     private final Pair<Date, Integer> dateTimeAt9 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2024 09:00"), 0);
-    private final Pair<Date, Integer> dateTimeAt9_30 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2024 09:30"), 8);
     private final Pair<Date, Integer> dateTimeAt14 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2024 14:00"), 0);
     private final Pair<Date, Integer> dateTimeAt14_45 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2024 14:45"), 8);
+    private final Pair<Date, Integer> dateTimeHolidayAt6 = Pair.of(TollCalculatorTestUtils.getTripDateFromString("1-1-2023 06:00"), 8);
     private final Date saturdayDate = TollCalculatorTestUtils.getTripDateFromString("6-1-2024 06:00");
     private final Date sundayDate = TollCalculatorTestUtils.getTripDateFromString("7-1-2024 07:00");
 
@@ -135,4 +135,12 @@ public class TollCalculatorUnitTests {
         Integer totalFee = tollCalculator.getDayTollFee(vehicle, dateTimeAt6.getLeft());
         Assertions.assertEquals(totalFee, 0);
     }
+
+    @Test
+    void test_car_trip_at_holiday() {
+        Car vehicle = new Car();
+        Integer totalFee = tollCalculator.getDayTollFee(vehicle, dateTimeHolidayAt6.getLeft());
+        Assertions.assertEquals(totalFee, 0);
+    }
+
 }

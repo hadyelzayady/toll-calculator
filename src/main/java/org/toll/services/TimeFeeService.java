@@ -3,13 +3,15 @@ package org.toll.services;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
+import org.toll.utils.DateUtils;
 import org.toll.utils.TimeRange;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,6 +34,16 @@ public class TimeFeeService {
             new TimeRange(LocalTime.of(15, 0), LocalTime.of(15, 29)), (s) -> 13,
             new TimeRange(LocalTime.of(18, 0), LocalTime.of(18, 29)), (s) -> 8
     );
+    private static List<DayOfWeek> WEEKEND_DAYS = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+
+    private static Optional<TimeRange> getTimeRangeByDate(LocalDateTime date) {
+        return timeRangeFeeFnMap.keySet().stream().filter(range -> range.contains(date.toLocalTime())).findFirst();
+    }
+
+    private static boolean isWeekend(LocalDateTime date) {
+        return WEEKEND_DAYS.contains(date.getDayOfWeek());
+    }
+
 
     public static int getTimeFee(LocalDateTime date) {
         Optional<TimeRange> timeRange = getTimeRangeByDate(date);
@@ -44,32 +56,7 @@ public class TimeFeeService {
         return 0;
     }
 
-    private static Optional<TimeRange> getTimeRangeByDate(LocalDateTime date) {
-        return timeRangeFeeFnMap.keySet().stream().filter(range -> range.contains(date.toLocalTime())).findFirst();
-    }
-
-    public static boolean isDateFreeFee(Date date) {
-        Calendar calendar = GregorianCalendar.getInstance();
-        calendar.setTime(date);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) return true;
-
-        if (year == 2013) {
-            if (month == Calendar.JANUARY && day == 1 ||
-                    month == Calendar.MARCH && (day == 28 || day == 29) ||
-                    month == Calendar.APRIL && (day == 1 || day == 30) ||
-                    month == Calendar.MAY && (day == 1 || day == 8 || day == 9) ||
-                    month == Calendar.JUNE && (day == 5 || day == 6 || day == 21) ||
-                    month == Calendar.JULY ||
-                    month == Calendar.NOVEMBER && day == 1 ||
-                    month == Calendar.DECEMBER && (day == 24 || day == 25 || day == 26 || day == 31)) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean isDateFreeFee(LocalDateTime date) {
+        return isWeekend(date) || HolidayService.isHoliday(date.toLocalDate());
     }
 }

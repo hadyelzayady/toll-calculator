@@ -6,11 +6,11 @@ import java.util.Date;
 
 public class DateUtils {
     public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        return Date.from(localDateTime.atZone(ZoneId.of("UTC")).toInstant());
 
     }
 
     public static LocalDateTime convertDateToLocalDateTime(Date date) {
-        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("UTC"));
     }
 }
